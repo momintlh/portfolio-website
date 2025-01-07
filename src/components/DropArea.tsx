@@ -1,6 +1,5 @@
 import { useDroppable } from "@dnd-kit/core";
 
-
 function DropArea() {
 
     const { isOver, setNodeRef } = useDroppable({
