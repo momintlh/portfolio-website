@@ -1,6 +1,7 @@
 import { DndContext, DragEndEvent } from "@dnd-kit/core"
 import Card from "./components/Card"
 import DropArea from "./components/DropArea"
+import GlassCard from "./components/GlassCards";
 
 function App() {
   // const [card, setCard] = useState(false)
@@ -22,16 +23,21 @@ function App() {
         <div className="flex justify-center items-center flex-grow">
           <div className="w-[500px] h-[300px] bg-rose-950 rounded-xl  text-center">
             <h1 className="text-rose-50 text-2xl font-mono">Place you card here</h1>
-
             <DropArea />
-
           </div>
-        </div>  
 
-        <div className="flex justify-center items-end border-white border-2 translate-y-20">
-          <Card cardId={1} title="About" description="Who am I?" rotation="-rotate-[15deg] translate-x-4" />
-          <Card cardId={2} title="Work" description="What do I do?" rotation="rotate-0 -translate-y-4" />
-          <Card cardId={3} title="Stuff" description="my yapping" rotation="rotate-[15deg] -translate-x-4" />
+          <div className="bg-lime-300 w-24 h-24 rounded-full">
+          </div>
+
+          <div className="bg-indigo-400 w-24 h-24 rounded-full">
+          </div>
+
+        </div>
+
+        <div className="grid grid-flow-col  translate-y-20">
+          <GlassCard cardId={1} title="About" description="Who am I?" rotation="-rotate-[15deg] translate-x-2 -translate-y-5" />
+          <GlassCard cardId={2} title="Work" description="What do I do?" rotation="rotate-0 -translate-y-10" />
+          <GlassCard cardId={3} title="Stuff" description="my yapping" rotation="rotate-[15deg] -translate-x-2 -translate-y-5" />
         </div>
       </DndContext>
 
