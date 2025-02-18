@@ -22,7 +22,7 @@ function App() {
       <DndContext onDragEnd={handleEndDrag}>
         <div className="flex justify-center items-center flex-grow">
           <div
-            className="w-[500px] h-[300px] bg-rose-950 rounded-xl text-center  bg-white/10 backdrop-blur-[8px] border-white/15 
+            className="w-[500px] h-[300px] bg-rose-950 rounded-xl text-center  bg-black/10 backdrop-blur-[8px] border-white/15 
           border-2 shadow-sm"
           >
             <h1 className="text-rose-50 text-2xl font-mono">

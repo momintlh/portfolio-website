@@ -2,24 +2,39 @@ import React, { useRef, useEffect } from "react";
 
 interface CanvasProps {}
 
+type Vector2 = {
+  x: number;
+  y: number;
+};
+
 const BackgroundCanvas: React.FC<CanvasProps> = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const width = window.innerWidth;
   const height = window.innerHeight;
-
   const res = 50;
 
-  const rows = Math.ceil(height / res);
-  const cols = Math.ceil(width / res);
-
-  console.log(rows, cols);
-
-  const grid = Array.from({ length: rows }, () =>
-    Array.from({ length: cols }, () => Math.floor(Math.random() * 2))
+  let rows = Math.ceil(height / res);
+  let cols = Math.ceil(width / res);
+  let grid = Array.from({ length: cols }, () =>
+    Array.from({ length: rows }, () => Math.floor(Math.random() * 2))
   );
 
-  console.log(grid);
+  const CreateGrid = async (
+    rows: number,
+    height: number,
+    res: number,
+    cols: number,
+    width: number,
+    grid: number[][]
+  ) => {
+    rows = Math.ceil(height / res);
+    cols = Math.ceil(width / res);
+    grid = Array.from({ length: cols }, () =>
+      Array.from({ length: rows }, () => Math.floor(Math.random() * 2))
+    );
+    return { rows, cols, grid };
+  };
 
   const drawCircle = (
     ctx: CanvasRenderingContext2D,
@@ -36,15 +51,13 @@ const BackgroundCanvas: React.FC<CanvasProps> = () => {
 
   const drawLine = (
     ctx: CanvasRenderingContext2D,
-    x1: number,
-    y1: number,
-    x2: number,
-    y2: number,
+    v1: Vector2,
+    v2: Vector2,
     color: string = "rgba(255, 255, 255, 0.5)"
   ) => {
     ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
+    ctx.moveTo(v1.x, v1.y);
+    ctx.lineTo(v2.x, v2.y);
     ctx.strokeStyle = color;
     ctx.stroke();
     ctx.closePath();
@@ -55,17 +68,85 @@ const BackgroundCanvas: React.FC<CanvasProps> = () => {
     width: number,
     height: number
   ) => {
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+    ctx.strokeStyle = "rgba(0, 255, 255, 0.1)";
     ctx.lineWidth = 1;
 
     for (let c = 0; c < cols; c++) {
       for (let r = 0; r < rows; r++) {
-        ctx.strokeRect(c * res, r * res, res, res);
+        // ctx.strokeRect(c * res, r * res, res, res);
 
-        if (grid[r][c] === 1)
-          drawCircle(ctx, c * res, r * res, 5, "rgba(0, 255, 0, 0.5)");
-        else drawCircle(ctx, c * res, r * res, 5);
+        if (grid[c][r] == 1) {
+          drawCircle(ctx, c * res, r * res, 2, "rgba(0, 255, 0, 1)");
+          // ctx.fillStyle = "yellow";
+          // ctx.fillText(`${grid[c][r]}`, c * res, r * res, 50);
+        } else if (grid[c][r] === 0) {
+          // ctx.fillStyle = "purple";
+          // ctx.fillText(`${grid[c][r]}`, c * res, r * res, 50);
+          drawCircle(ctx, c * res, r * res, 2, "rgba(255, 0, 0, 1)");
+        }
       }
+    }
+  };
+
+  const getState = (a: number, b: number, c: number, d: number): number => {
+    return a * 8 + b * 4 + c * 2 * d + 1;
+  };
+
+  const drawState = (
+    state: number,
+    ctx: CanvasRenderingContext2D,
+    A: Vector2,
+    B: Vector2,
+    C: Vector2,
+    D: Vector2
+  ) => {
+    switch (state) {
+      case 1:
+        drawLine(ctx, C, D);
+        break;
+      case 2:
+        drawLine(ctx, B, C);
+        break;
+      case 3:
+        drawLine(ctx, B, D);
+        break;
+      case 4:
+        drawLine(ctx, A, B);
+        break;
+      case 5:
+        drawLine(ctx, A, D);
+        drawLine(ctx, B, D);
+        break;
+      case 6:
+        drawLine(ctx, A, C);
+        break;
+      case 7:
+        drawLine(ctx, A, D);
+        break;
+      case 8:
+        drawLine(ctx, A, D);
+        break;
+      case 9:
+        drawLine(ctx, A, C);
+        break;
+      case 10:
+        drawLine(ctx, A, B);
+        drawLine(ctx, C, D);
+        break;
+      case 11:
+        drawLine(ctx, A, B);
+        break;
+      case 12:
+        drawLine(ctx, B, D);
+        break;
+      case 13:
+        drawLine(ctx, B, C);
+        break;
+      case 14:
+        drawLine(ctx, D, C);
+        break;
+      default:
+        break;
     }
   };
 
@@ -79,33 +160,28 @@ const BackgroundCanvas: React.FC<CanvasProps> = () => {
 
     for (let c = 0; c < cols; c++) {
       for (let r = 0; r < rows; r++) {
+        let state = getState(
+          grid[c][r],
+          grid[c + 1][r],
+          grid[c][r + 1],
+          grid[c + 1][r + 1]
+        );
+        console.log("state: " + state);
+
         let x = c * res;
         let y = r * res;
 
-        let A = { x: x + res / 2, y: y };
-        let B = { x: x + res, y: y + res / 2 };
-        let C = { x: x + res / 2, y: y + res };
-        let D = { x: x, y: y + res / 2 };
+        let A = { x: x + res / 2, y: y } as Vector2;
+        let B = { x: x + res, y: y + res / 2 } as Vector2;
+        let C = { x: x + res / 2, y: y + res } as Vector2;
+        let D = { x: x, y: y + res / 2 } as Vector2;
 
-        console.log(A, B, C, D);
-
-        // Temporarily draw the points
-        drawCircle(ctx, A.x, A.y, 2, "rgba(255, 0, 0, 1)");
-        drawCircle(ctx, B.x, B.y, 2, "rgba(0, 255, 255, 1)");
-        drawCircle(ctx, C.x, C.y, 2, "rgba(255, 0, 255, 1)");
-        drawCircle(ctx, D.x, D.y, 2, "rgba(255, 255, 0, 1)");
-
-        if (grid[r][c] === 1) {
-          drawLine(ctx, C.x, C.y, D.x, D.y, "rgba(0, 255, 255, 1)");
-          drawLine(ctx, D.x, D.y, A.x, A.y, "rgba(0, 255, 0, 1)");
-          drawLine(ctx, A.x, A.y, B.x, B.y, "rgba(255, 0, 255, 1)");
-          drawLine(ctx, B.x, B.y, C.x, C.y, "rgba(255, 255, 0, 1)");
-        }
+        drawState(state, ctx, A, B, C, D);
       }
     }
   };
 
-  const handleResize = () => {
+  const handleResize = async () => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
 
@@ -113,6 +189,15 @@ const BackgroundCanvas: React.FC<CanvasProps> = () => {
 
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+
+    ({ rows, cols, grid } = await CreateGrid(
+      rows,
+      height,
+      res,
+      cols,
+      width,
+      grid
+    ));
 
     drawBackgroundGrid(ctx, canvas.width, canvas.height);
     drawContours(ctx, canvas.width, canvas.height);
