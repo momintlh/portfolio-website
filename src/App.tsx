@@ -21,16 +21,15 @@ function App() {
 
       <DndContext onDragEnd={handleEndDrag}>
         <div className="flex justify-center items-center flex-grow">
-          <div className="w-[500px] h-[300px] bg-rose-950 rounded-xl  text-center">
+          <div
+            className="w-[500px] h-[300px] bg-rose-950 rounded-xl text-center  bg-white/10 backdrop-blur-[8px] border-white/15 
+          border-2 shadow-sm"
+          >
             <h1 className="text-rose-50 text-2xl font-mono">
               Place you card here
             </h1>
             <DropArea />
           </div>
-
-          <div className="bg-lime-300 w-24 h-24 rounded-full"></div>
-
-          <div className="bg-indigo-400 w-24 h-24 rounded-full"></div>
         </div>
 
         <div className="grid grid-flow-col  translate-y-20">
