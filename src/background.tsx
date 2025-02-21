@@ -13,17 +13,20 @@ const BackgroundCanvas: React.FC<CanvasProps> = ({ children }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const width = window.innerWidth;
   const height = window.innerHeight;
-  const res = 200;
-  const offset = 50;
+  const res = 20;
+  const offset = 0;
+  const circleRadiusAndFont = 0;
 
   // We'll store grid as a simple array.
   // For a more reactive UI, consider using useState.
-  let grid: number[][] = [[0, 0], [0, 0]];
+  let grid: number[][];
 
   const CreateGrid = async (): Promise<{ rows: number; cols: number; grid: number[][] }> => {
     const cols = Math.ceil(width / res);
     const rows = Math.ceil(height / res);
-    grid = [[0, 1], [0, 0]];
+    grid = Array.from({ length: cols }, () =>
+      Array.from({ length: rows }, () => Math.floor(Math.random() * 2))
+    );
     return { rows, cols, grid };
   };
 
@@ -59,12 +62,12 @@ const BackgroundCanvas: React.FC<CanvasProps> = ({ children }) => {
     for (let c = 0; c < grid.length; c++) {
       for (let r = 0; r < grid[c].length; r++) {
         // Determine circle color based on grid value (for example)
-        const color = grid[c][r] === 0 ? "red" : "green";
+        const color = grid[c][r] === 0 ? "white" : "black";
         const x = c * res + offset;
         const y = r * res + offset;
-        drawCircle(ctx, x, y, 20, color);
+        drawCircle(ctx, x, y, circleRadiusAndFont, color);
         ctx.fillStyle = "white";
-        ctx.font = "20px sans-serif";
+        ctx.font = `${circleRadiusAndFont}px sans-serif`;
         ctx.fillText(grid[c][r].toString(), x - 5, y + 5, 100);
       }
     }

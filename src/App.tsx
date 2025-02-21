@@ -17,7 +17,9 @@ function App() {
 
   return (
     <>
-      {/* <div className="flex flex-col justify-between items-center  border-rose-600 border-2 overflow-hidden w-screen h-screen">
+      <BackgroundCanvas />
+
+      <div className="flex flex-col justify-between items-center  border-rose-600 border-2 overflow-hidden w-screen h-screen">
         <DndContext onDragEnd={handleEndDrag}>
           <div className="flex justify-center items-center flex-grow">
             <div
@@ -52,8 +54,7 @@ function App() {
             />
           </div>
         </DndContext>
-      </div> */}
-      <BackgroundCanvas />
+      </div>
     </>
 
   );
