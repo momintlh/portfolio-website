@@ -1,38 +1,29 @@
 import React, { useRef, useEffect } from "react";
 
-interface CanvasProps {}
+interface CanvasProps {
+  children?: React.ReactNode;
+}
 
 type Vector2 = {
   x: number;
   y: number;
 };
 
-const BackgroundCanvas: React.FC<CanvasProps> = () => {
+const BackgroundCanvas: React.FC<CanvasProps> = ({ children }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-
   const width = window.innerWidth;
   const height = window.innerHeight;
-  const res = 50;
+  const res = 200;
+  const offset = 50;
 
-  let rows = Math.ceil(height / res);
-  let cols = Math.ceil(width / res);
-  let grid = Array.from({ length: cols }, () =>
-    Array.from({ length: rows }, () => Math.floor(Math.random() * 2))
-  );
+  // We'll store grid as a simple array.
+  // For a more reactive UI, consider using useState.
+  let grid: number[][] = [[0, 0], [0, 0]];
 
-  const CreateGrid = async (
-    rows: number,
-    height: number,
-    res: number,
-    cols: number,
-    width: number,
-    grid: number[][]
-  ) => {
-    rows = Math.ceil(height / res);
-    cols = Math.ceil(width / res);
-    grid = Array.from({ length: cols }, () =>
-      Array.from({ length: rows }, () => Math.floor(Math.random() * 2))
-    );
+  const CreateGrid = async (): Promise<{ rows: number; cols: number; grid: number[][] }> => {
+    const cols = Math.ceil(width / res);
+    const rows = Math.ceil(height / res);
+    grid = [[0, 1], [0, 0]];
     return { rows, cols, grid };
   };
 
@@ -63,33 +54,48 @@ const BackgroundCanvas: React.FC<CanvasProps> = () => {
     ctx.closePath();
   };
 
-  const drawBackgroundGrid = (
-    ctx: CanvasRenderingContext2D,
-    width: number,
-    height: number
-  ) => {
+  const drawBackgroundGrid = (ctx: CanvasRenderingContext2D, canvasWidth: number, canvasHeight: number) => {
     ctx.strokeStyle = "rgba(0, 255, 255, 0.1)";
-    ctx.lineWidth = 1;
-
-    for (let c = 0; c < cols; c++) {
-      for (let r = 0; r < rows; r++) {
-        // ctx.strokeRect(c * res, r * res, res, res);
-
-        if (grid[c][r] == 1) {
-          drawCircle(ctx, c * res, r * res, 2, "rgba(0, 255, 0, 1)");
-          // ctx.fillStyle = "yellow";
-          // ctx.fillText(`${grid[c][r]}`, c * res, r * res, 50);
-        } else if (grid[c][r] === 0) {
-          // ctx.fillStyle = "purple";
-          // ctx.fillText(`${grid[c][r]}`, c * res, r * res, 50);
-          drawCircle(ctx, c * res, r * res, 2, "rgba(255, 0, 0, 1)");
-        }
+    for (let c = 0; c < grid.length; c++) {
+      for (let r = 0; r < grid[c].length; r++) {
+        // Determine circle color based on grid value (for example)
+        const color = grid[c][r] === 0 ? "red" : "green";
+        const x = c * res + offset;
+        const y = r * res + offset;
+        drawCircle(ctx, x, y, 20, color);
+        ctx.fillStyle = "white";
+        ctx.font = "20px sans-serif";
+        ctx.fillText(grid[c][r].toString(), x - 5, y + 5, 100);
       }
     }
   };
 
   const getState = (a: number, b: number, c: number, d: number): number => {
-    return a * 8 + b * 4 + c * 2 * d + 1;
+    return a * 8 + b * 4 + c * 2 + d * 1;
+  }
+
+  const drawContours = (ctx: CanvasRenderingContext2D, canvasWidth: number, canvasHeight: number) => {
+    ctx.strokeStyle = "rgba(0, 255, 255, 1)";
+    ctx.lineWidth = 1;
+
+    for (let c = 0; c < grid.length - 1; c++) {
+      for (let r = 0; r < grid[c].length - 1; r++) {
+        let x = c * res;
+        let y = r * res;
+
+        let A = { x: x + res / 2 + offset, y: y + offset } as Vector2;
+        let B = { x: x + res + offset, y: y + res / 2 + offset } as Vector2;
+        let C = { x: x + res / 2 + offset, y: y + res + offset } as Vector2;
+        let D = { x: x + offset, y: y + res / 2 + offset } as Vector2;
+
+
+        let state = getState(grid[c][r], grid[c + 1][r], grid[c + 1][r + 1], grid[c][r + 1]);
+        console.log("b: " + grid[c][r], grid[c + 1][r], grid[c + 1][r + 1], grid[c][r + 1]);
+        console.log("State:" + state);
+
+        drawState(state, ctx, A, B, C, D);
+      }
+    }
   };
 
   const drawState = (
@@ -102,125 +108,123 @@ const BackgroundCanvas: React.FC<CanvasProps> = () => {
   ) => {
     switch (state) {
       case 1:
-        drawLine(ctx, C, D);
+      case 14:
+        drawLine(ctx, D, C);
         break;
       case 2:
+      case 13:
         drawLine(ctx, B, C);
         break;
       case 3:
-        drawLine(ctx, B, D);
+      case 12:
+        drawLine(ctx, D, B);
         break;
+      case 11:
       case 4:
         drawLine(ctx, A, B);
         break;
       case 5:
-        drawLine(ctx, A, D);
-        drawLine(ctx, B, D);
+        drawLine(ctx, D, A);
+        drawLine(ctx, C, B);
         break;
       case 6:
-        drawLine(ctx, A, C);
+      case 9:
+        drawLine(ctx, C, A);
         break;
       case 7:
-        drawLine(ctx, A, D);
-        break;
       case 8:
-        drawLine(ctx, A, D);
-        break;
-      case 9:
-        drawLine(ctx, A, C);
+        drawLine(ctx, D, A);
         break;
       case 10:
         drawLine(ctx, A, B);
         drawLine(ctx, C, D);
-        break;
-      case 11:
-        drawLine(ctx, A, B);
-        break;
-      case 12:
-        drawLine(ctx, B, D);
-        break;
-      case 13:
-        drawLine(ctx, B, C);
-        break;
-      case 14:
-        drawLine(ctx, D, C);
         break;
       default:
         break;
     }
   };
 
-  const drawContours = (
-    ctx: CanvasRenderingContext2D,
-    width: number,
-    height: number
-  ) => {
-    ctx.strokeStyle = "rgba(0, 255, 255, 1)";
-    ctx.lineWidth = 1;
-
-    for (let c = 0; c < cols; c++) {
-      for (let r = 0; r < rows; r++) {
-        let state = getState(
-          grid[c][r],
-          grid[c + 1][r],
-          grid[c][r + 1],
-          grid[c + 1][r + 1]
-        );
-        console.log("state: " + state);
-
-        let x = c * res;
-        let y = r * res;
-
-        let A = { x: x + res / 2, y: y } as Vector2;
-        let B = { x: x + res, y: y + res / 2 } as Vector2;
-        let C = { x: x + res / 2, y: y + res } as Vector2;
-        let D = { x: x, y: y + res / 2 } as Vector2;
-
-        drawState(state, ctx, A, B, C, D);
-      }
-    }
+  // A function to redraw the canvas
+  const redraw = (ctx: CanvasRenderingContext2D, canvasWidth: number, canvasHeight: number) => {
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+    drawBackgroundGrid(ctx, canvasWidth, canvasHeight);
+    drawContours(ctx, canvasWidth, canvasHeight);
   };
 
+  // Setup canvas size and initial drawing
   const handleResize = async () => {
     const canvas = canvasRef.current;
-    const ctx = canvas?.getContext("2d");
-
-    if (!canvas || !ctx) return;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
 
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    ({ rows, cols, grid } = await CreateGrid(
-      rows,
-      height,
-      res,
-      cols,
-      width,
-      grid
-    ));
-
-    drawBackgroundGrid(ctx, canvas.width, canvas.height);
-    drawContours(ctx, canvas.width, canvas.height);
+    await CreateGrid();
+    redraw(ctx, canvas.width, canvas.height);
   };
 
+  // Add a single event listener for clicks on the canvas
   useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    // Ensure the canvas is set up initially
     handleResize();
+
+    const handleClick = (ev: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = ev.clientX - rect.left;
+      const mouseY = ev.clientY - rect.top;
+
+      // Check each circle in the grid
+      for (let c = 0; c < grid.length; c++) {
+        for (let r = 0; r < grid[c].length; r++) {
+          const circleX = c * res + offset;
+          const circleY = r * res + offset;
+          const radius = 20;
+          // Calculate distance from click to circle center
+          const dist = Math.sqrt((mouseX - circleX) ** 2 + (mouseY - circleY) ** 2);
+          if (dist <= radius) {
+            console.log(`Circle at grid position [${c}, ${r}] clicked!`);
+            // For example, toggle the grid value
+            grid[c][r] = grid[c][r] === 0 ? 1 : 0;
+
+            // Redraw the canvas with updated grid state
+            const ctx = canvas.getContext("2d");
+            if (ctx) {
+              redraw(ctx, canvas.width, canvas.height);
+            }
+          }
+        }
+      }
+    };
+
+    canvas.addEventListener("mousedown", handleClick);
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+
+    return () => {
+      canvas.removeEventListener("mousedown", handleClick);
+      window.removeEventListener("resize", handleResize);
+    };
   }, []);
 
   return (
-    <canvas
-      ref={canvasRef}
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        zIndex: -5,
-        width: "100%",
-        height: "100%",
-      }}
-    />
+    <>
+      <canvas
+        ref={canvasRef}
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          zIndex: 0,
+          width: "100%",
+          height: "100%",
+        }}
+      />
+      {children}
+    </>
   );
 };
 
