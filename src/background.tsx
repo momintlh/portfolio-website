@@ -1,4 +1,8 @@
 import React, { useRef, useEffect } from "react";
+import { createNoise3D } from "simplex-noise";
+
+// Initialize Simplex noise 3D
+const simplex = createNoise3D();
 
 interface CanvasProps {
   children?: React.ReactNode;
@@ -9,45 +13,43 @@ type Vector2 = {
   y: number;
 };
 
+// Linear interpolation along an edge between p1 and p2,
+// given noise values v1 and v2 and a threshold.
+const interpolateEdge = (
+  p1: Vector2,
+  p2: Vector2,
+  v1: number,
+  v2: number,
+  threshold: number
+): Vector2 => {
+  if (Math.abs(v2 - v1) < 0.0001) return p1;
+  const t = (threshold - v1) / (v2 - v1);
+  return {
+    x: p1.x + t * (p2.x - p1.x),
+    y: p1.y + t * (p2.y - p1.y),
+  };
+};
+
 const BackgroundCanvas: React.FC<CanvasProps> = ({ children }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const width = window.innerWidth;
-  const height = window.innerHeight;
-  const res = 20;
+  // Use a small resolution to create many cells
+  const res = 5;
   const offset = 0;
   const circleRadiusAndFont = 0;
-
-  // We'll store grid as a simple array.
-  // For a more reactive UI, consider using useState.
-  let grid: number[][];
-
-  const CreateGrid = async (): Promise<{ rows: number; cols: number; grid: number[][] }> => {
-    const cols = Math.ceil(width / res);
-    const rows = Math.ceil(height / res);
-    grid = Array.from({ length: cols }, () =>
-      Array.from({ length: rows }, () => Math.floor(Math.random() * 2))
-    );
-    return { rows, cols, grid };
-  };
-
-  const drawCircle = (
-    ctx: CanvasRenderingContext2D,
-    x: number,
-    y: number,
-    radius: number,
-    color: string = "rgba(255, 0, 0, 0.5)"
-  ) => {
-    ctx.beginPath();
-    ctx.arc(x, y, radius, 0, Math.PI * 2);
-    ctx.fillStyle = color;
-    ctx.fill();
-  };
+  // Grid will store continuous noise values.
+  let grid: number[][] = [];
+  // Threshold for contour (using 0 as isovalue)
+  const threshold = 0;
+  // A ref to track the current mouse position (or null if not available)
+  const mousePosRef = useRef<{ x: number; y: number } | null>(null);
+  // Radius (in pixels) around the mouse where lines are "destroyed"
+  const destroyRadius = 10;
 
   const drawLine = (
     ctx: CanvasRenderingContext2D,
     v1: Vector2,
     v2: Vector2,
-    color: string = "rgba(255, 255, 255, 0.5)"
+    color: string = "rgba(0, 255, 255, 1)"
   ) => {
     ctx.beginPath();
     ctx.moveTo(v1.x, v1.y);
@@ -57,158 +59,199 @@ const BackgroundCanvas: React.FC<CanvasProps> = ({ children }) => {
     ctx.closePath();
   };
 
-  const drawBackgroundGrid = (ctx: CanvasRenderingContext2D, canvasWidth: number, canvasHeight: number) => {
+  // Draw a single cell with interpolated contour segments.
+  const drawInterpolatedCell = (
+    c: number,
+    r: number,
+    x: number,
+    y: number,
+    ctx: CanvasRenderingContext2D
+  ) => {
+    const tl = grid[c][r];       // top-left
+    const tr = grid[c + 1][r];     // top-right
+    const br = grid[c + 1][r + 1]; // bottom-right
+    const bl = grid[c][r + 1];     // bottom-left
+
+    // Determine binary values for marching squares.
+    const a = tl >= threshold ? 1 : 0;
+    const b = tr >= threshold ? 1 : 0;
+    const cVal = br >= threshold ? 1 : 0; // renamed to avoid conflict with index r
+    const d = bl >= threshold ? 1 : 0;
+    const state = a * 8 + b * 4 + cVal * 2 + d;
+
+    // Define corner positions.
+    const topLeft: Vector2 = { x: x, y: y };
+    const topRight: Vector2 = { x: x + res, y: y };
+    const bottomRight: Vector2 = { x: x + res, y: y + res };
+    const bottomLeft: Vector2 = { x: x, y: y + res };
+
+    // Compute interpolated intersection points along each edge.
+    const topPoint =
+      a !== b ? interpolateEdge(topLeft, topRight, tl, tr, threshold) : null;
+    const rightPoint =
+      b !== cVal
+        ? interpolateEdge(topRight, bottomRight, tr, br, threshold)
+        : null;
+    const bottomPoint =
+      cVal !== d
+        ? interpolateEdge(bottomRight, bottomLeft, br, bl, threshold)
+        : null;
+    const leftPoint =
+      d !== a ? interpolateEdge(bottomLeft, topLeft, bl, tl, threshold) : null;
+
+    const intersections: { [edge: string]: Vector2 } = {};
+    if (topPoint) intersections["top"] = topPoint;
+    if (rightPoint) intersections["right"] = rightPoint;
+    if (bottomPoint) intersections["bottom"] = bottomPoint;
+    if (leftPoint) intersections["left"] = leftPoint;
+
+    // Marching squares lookup table mapping state to segments.
+    const lookup: { [key: number]: string[][] } = {
+      0: [],
+      1: [["left", "bottom"]],
+      2: [["bottom", "right"]],
+      3: [["left", "right"]],
+      4: [["top", "right"]],
+      5: [["top", "left"], ["bottom", "right"]], // ambiguous
+      6: [["top", "bottom"]],
+      7: [["top", "left"]],
+      8: [["top", "left"]],
+      9: [["top", "bottom"]],
+      10: [["top", "right"], ["bottom", "left"]], // ambiguous
+      11: [["top", "right"]],
+      12: [["left", "right"]],
+      13: [["bottom", "right"]],
+      14: [["left", "bottom"]],
+      15: [],
+    };
+
+    const segments = lookup[state];
+    segments.forEach((pair) => {
+      const p1 = intersections[pair[0]];
+      const p2 = intersections[pair[1]];
+      if (p1 && p2) {
+        drawLine(ctx, p1, p2);
+      }
+    });
+  };
+
+  // Draw contours for the entire grid using interpolation.
+  const drawContours = (
+    ctx: CanvasRenderingContext2D,
+    canvasWidth: number,
+    canvasHeight: number
+  ) => {
+    ctx.lineWidth = 1;
+    for (let c = 0; c < grid.length - 1; c++) {
+      for (let r = 0; r < grid[c].length - 1; r++) {
+        const x = c * res + offset;
+        const y = r * res + offset;
+        drawInterpolatedCell(c, r, x, y, ctx);
+      }
+    }
+  };
+
+  // Optionally, you could draw a background grid here.
+  const drawBackgroundGrid = (
+    ctx: CanvasRenderingContext2D,
+    canvasWidth: number,
+    canvasHeight: number
+  ) => {
     ctx.strokeStyle = "rgba(0, 255, 255, 0.1)";
     for (let c = 0; c < grid.length; c++) {
       for (let r = 0; r < grid[c].length; r++) {
-        // Determine circle color based on grid value (for example)
-        const color = grid[c][r] === 0 ? "white" : "black";
+        const color = grid[c][r] >= threshold ? "black" : "white";
         const x = c * res + offset;
         const y = r * res + offset;
-        drawCircle(ctx, x, y, circleRadiusAndFont, color);
-        ctx.fillStyle = "white";
-        ctx.font = `${circleRadiusAndFont}px sans-serif`;
-        ctx.fillText(grid[c][r].toString(), x - 5, y + 5, 100);
+        ctx.beginPath();
+        ctx.arc(x, y, circleRadiusAndFont, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.fill();
       }
     }
   };
 
-  const getState = (a: number, b: number, c: number, d: number): number => {
-    return a * 8 + b * 4 + c * 2 + d * 1;
-  }
-
-  const drawContours = (ctx: CanvasRenderingContext2D, canvasWidth: number, canvasHeight: number) => {
-    ctx.strokeStyle = "rgba(0, 255, 255, 1)";
-    ctx.lineWidth = 1;
-
-    for (let c = 0; c < grid.length - 1; c++) {
-      for (let r = 0; r < grid[c].length - 1; r++) {
-        let x = c * res;
-        let y = r * res;
-
-        let A = { x: x + res / 2 + offset, y: y + offset } as Vector2;
-        let B = { x: x + res + offset, y: y + res / 2 + offset } as Vector2;
-        let C = { x: x + res / 2 + offset, y: y + res + offset } as Vector2;
-        let D = { x: x + offset, y: y + res / 2 + offset } as Vector2;
-
-
-        let state = getState(grid[c][r], grid[c + 1][r], grid[c + 1][r + 1], grid[c][r + 1]);
-        console.log("b: " + grid[c][r], grid[c + 1][r], grid[c + 1][r + 1], grid[c][r + 1]);
-        console.log("State:" + state);
-
-        drawState(state, ctx, A, B, C, D);
-      }
-    }
-  };
-
-  const drawState = (
-    state: number,
+  const redraw = (
     ctx: CanvasRenderingContext2D,
-    A: Vector2,
-    B: Vector2,
-    C: Vector2,
-    D: Vector2
+    canvasWidth: number,
+    canvasHeight: number
   ) => {
-    switch (state) {
-      case 1:
-      case 14:
-        drawLine(ctx, D, C);
-        break;
-      case 2:
-      case 13:
-        drawLine(ctx, B, C);
-        break;
-      case 3:
-      case 12:
-        drawLine(ctx, D, B);
-        break;
-      case 11:
-      case 4:
-        drawLine(ctx, A, B);
-        break;
-      case 5:
-        drawLine(ctx, D, A);
-        drawLine(ctx, C, B);
-        break;
-      case 6:
-      case 9:
-        drawLine(ctx, C, A);
-        break;
-      case 7:
-      case 8:
-        drawLine(ctx, D, A);
-        break;
-      case 10:
-        drawLine(ctx, A, B);
-        drawLine(ctx, C, D);
-        break;
-      default:
-        break;
-    }
-  };
-
-  // A function to redraw the canvas
-  const redraw = (ctx: CanvasRenderingContext2D, canvasWidth: number, canvasHeight: number) => {
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-    drawBackgroundGrid(ctx, canvasWidth, canvasHeight);
+    // Optionally draw the background grid:
+    // drawBackgroundGrid(ctx, canvasWidth, canvasHeight);
     drawContours(ctx, canvasWidth, canvasHeight);
   };
 
-  // Setup canvas size and initial drawing
-  const handleResize = async () => {
+  // Handle canvas resize.
+  const handleResize = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-
-    await CreateGrid();
-    redraw(ctx, canvas.width, canvas.height);
   };
 
-  // Add a single event listener for clicks on the canvas
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
-    // Ensure the canvas is set up initially
-    handleResize();
+    let animationFrameId: number;
+    let time = 0;
+    const noiseScale = 10;
 
-    const handleClick = (ev: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      const mouseX = ev.clientX - rect.left;
-      const mouseY = ev.clientY - rect.top;
-
-      // Check each circle in the grid
-      for (let c = 0; c < grid.length; c++) {
-        for (let r = 0; r < grid[c].length; r++) {
-          const circleX = c * res + offset;
-          const circleY = r * res + offset;
-          const radius = 20;
-          // Calculate distance from click to circle center
-          const dist = Math.sqrt((mouseX - circleX) ** 2 + (mouseY - circleY) ** 2);
-          if (dist <= radius) {
-            console.log(`Circle at grid position [${c}, ${r}] clicked!`);
-            // For example, toggle the grid value
-            grid[c][r] = grid[c][r] === 0 ? 1 : 0;
-
-            // Redraw the canvas with updated grid state
-            const ctx = canvas.getContext("2d");
-            if (ctx) {
-              redraw(ctx, canvas.width, canvas.height);
+    // Update grid: store continuous noise values.
+    const updateGrid = () => {
+      const cols = Math.ceil(window.innerWidth / res) + 1;
+      const rows = Math.ceil(window.innerHeight / res) + 1;
+      grid = Array.from({ length: cols }, (_, i) =>
+        Array.from({ length: rows }, (_, j) => {
+          let noiseValue = simplex(i / noiseScale, j / noiseScale, time);
+          // If the cell is near the mouse, override noiseValue to "destroy" lines.
+          if (mousePosRef.current) {
+            const cellX = i * res;
+            const cellY = j * res;
+            const dx = cellX - mousePosRef.current.x;
+            const dy = cellY - mousePosRef.current.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < destroyRadius) {
+              noiseValue = 1; // Set uniformly above threshold.
             }
           }
-        }
-      }
+          return noiseValue;
+        })
+      );
     };
 
-    canvas.addEventListener("mousedown", handleClick);
+    // Animation loop: update time, grid, and redraw.
+    const animate = () => {
+      time += 0.005;
+      updateGrid();
+      redraw(ctx, canvas.width, canvas.height);
+      animationFrameId = requestAnimationFrame(animate);
+    };
+
+    animate();
+
+    // Remove mousedown; instead use mousemove to update mouse position.
+    const handleMouseMove = (ev: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      mousePosRef.current = {
+        x: ev.clientX - rect.left,
+        y: ev.clientY - rect.top,
+      };
+    };
+
+    canvas.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("resize", handleResize);
 
     return () => {
-      canvas.removeEventListener("mousedown", handleClick);
+      cancelAnimationFrame(animationFrameId);
+      canvas.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("resize", handleResize);
     };
   }, []);
