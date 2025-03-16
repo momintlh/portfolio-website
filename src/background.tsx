@@ -58,7 +58,7 @@ const BackgroundCanvas: React.FC<CanvasProps> = ({ children }) => {
     ctx.closePath();
   };
 
-  const drawBackgroundGrid = (ctx: CanvasRenderingContext2D, canvasWidth: number, canvasHeight: number) => {
+  const drawBackgroundGrid = (ctx: CanvasRenderingContext2D, _canvasWidth: number, _canvasHeight: number) => {
     ctx.strokeStyle = "rgba(0, 255, 255, 0.1)";
     for (let c = 0; c < grid.length; c++) {
       for (let r = 0; r < grid[c].length; r++) {
@@ -78,7 +78,7 @@ const BackgroundCanvas: React.FC<CanvasProps> = ({ children }) => {
     return a * 8 + b * 4 + c * 2 + d * 1;
   }
 
-  const drawContours = (ctx: CanvasRenderingContext2D, canvasWidth: number, canvasHeight: number) => {
+  const drawContours = (ctx: CanvasRenderingContext2D, _canvasWidth: number, _canvasHeight: number) => {
     ctx.strokeStyle = "rgba(0, 255, 255, 1)";
     ctx.lineWidth = 1;
 
