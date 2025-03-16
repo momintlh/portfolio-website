@@ -4,14 +4,12 @@ import GlassCard from "./components/GlassCards";
 import BackgroundCanvas from "./background";
 
 function App() {
-  // const [card, setCard] = useState(false)
 
   function handleEndDrag(event: DragEndEvent) {
     const { over } = event;
     if (!over) return;
 
     console.log(over.id);
-    // setCard(true)
   }
 
   return (
@@ -22,10 +20,9 @@ function App() {
         <DndContext onDragEnd={handleEndDrag}>
           <div className="flex justify-center items-center flex-grow">
             <div
-              className="w-[500px] h-[300px] rounded-xl text-center  bg-blue-500/5 backdrop-blur-[4px] border-blue-200/10 border-[3px] shadow-lg"
+              className="flex justify-center items-center w-[500px] h-[300px] rounded-xl text-center  bg-blue-500/5 backdrop-blur-[4px] border-blue-200/10 border-[3px] shadow-lg"
             >
               <h1 className="text-rose-50 text-2xl font-mono">
-                Place you card here
               </h1>
               <DropArea />
             </div>
@@ -40,7 +37,7 @@ function App() {
             />
             <GlassCard
               cardId={2}
-              title="Work"
+              title="Projects"
               description="What do I do?"
               rotation="rotate-0 -translate-y-2"
             />
