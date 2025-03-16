@@ -18,7 +18,6 @@ function GlassCard({ title, description, rotation, cardId }: CardProps) {
     transform: CSS.Translate.toString(transform),
   };
 
-  // bg-gradient-to-br from-[#ffffff7F] to-transparent backdrop-blur-xl
 
   return (
     <div
@@ -26,15 +25,13 @@ function GlassCard({ title, description, rotation, cardId }: CardProps) {
       style={style}
       {...listeners}
       {...attributes}
-      className={` ${rotation} touch-none  w-[120px] h-[160px] sm:w-[135px] sm:h-[180px] md:w-[150px] md:h-[200px] rounded-2xl
+      className={` ${rotation} touch-none sm:w-[135px] sm:h-[180px] md:w-[135px] md:h-[180px] rounded-2xl border-2
+      bg-white/5 backdrop-blur-[5px] border-white/15 hover:ring-2
        
-      bg-white/5 backdrop-blur-[8px] border-white/15 shadow-sm hover:ring-2
-       
-       ${
-         !isDragging
-           ? "hover:-translate-y-14 transform transition-transform duration-200"
-           : "duration-0"
-       }`}
+       ${!isDragging
+          ? "hover:-translate-y-4 transform transition-transform duration-200"
+          : "duration-75"
+        }`}
     >
       <h2 className="text-gray-50 text-center">{title}</h2>
       <p className="text-gray-300 text-sm text-center">{description}</p>

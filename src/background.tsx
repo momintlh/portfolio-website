@@ -11,6 +11,7 @@ type Vector2 = {
 
 const BackgroundCanvas: React.FC<CanvasProps> = ({ children }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
   const width = window.innerWidth;
   const height = window.innerHeight;
   const res = 20;
