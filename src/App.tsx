@@ -2,12 +2,20 @@ import { DndContext, DragEndEvent } from "@dnd-kit/core";
 import DropArea from "./components/DropArea";
 import GlassCard from "./components/GlassCards";
 import BackgroundCanvas from "./background";
+import { SortableContext } from "@dnd-kit/sortable";
+import { useState } from "react";
 
 function App() {
+
+  const [items] = useState(['1', '2', '3']);
 
   function handleEndDrag(event: DragEndEvent) {
     const { over } = event;
     if (!over) return;
+
+    console.log(`width: ${window.innerWidth}`);
+    console.log(`height: ${window.innerHeight}`);
+    
 
     console.log(over.id);
   }
@@ -15,7 +23,6 @@ function App() {
   return (
     <>
       <BackgroundCanvas />
-
       <div className="flex flex-col justify-between items-center  border-rose-600 border-2 overflow-hidden w-screen h-screen">
         <DndContext onDragEnd={handleEndDrag}>
           <div className="flex justify-center items-center flex-grow">
@@ -28,25 +35,27 @@ function App() {
             </div>
           </div>
 
-          <div className="grid grid-flow-col">
-            <GlassCard
-              cardId={1}
-              title="About"
-              description="Who am I?"
-              rotation="-rotate-[15deg] translate-x-2"
-            />
-            <GlassCard
-              cardId={2}
-              title="Projects"
-              description="What do I do?"
-              rotation="rotate-0 -translate-y-2"
-            />
-            <GlassCard
-              cardId={3}
-              title="Stuff"
-              description="my yapping"
-              rotation="rotate-[15deg] -translate-x-2"
-            />
+          <div className="flex justify-center items-center -translate-y-12">
+            {/* <SortableContext items={items}> */}
+              <GlassCard
+                cardId={1}
+                title="About"
+                description="Who am I?"
+                rotation="-rotate-[15deg] translate-x-2"
+              />
+              <GlassCard
+                cardId={2}
+                title="Projects"
+                description="What do I do?"
+                rotation="rotate-0 -translate-y-2"
+              />
+              <GlassCard
+                cardId={3}
+                title="Stuff"
+                description="my yapping"
+                rotation="rotate-[15deg] -translate-x-2"
+              />
+            {/* </SortableContext> */}
           </div>
         </DndContext>
       </div>

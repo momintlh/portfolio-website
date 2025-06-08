@@ -25,7 +25,7 @@ function GlassCard({ title, description, rotation, cardId }: CardProps) {
       style={style}
       {...listeners}
       {...attributes}
-      className={` ${rotation} touch-none sm:w-[135px] sm:h-[180px] md:w-[135px] md:h-[180px] rounded-2xl border-2
+      className={` ${rotation} touch-none  rounded-2xl border-2 w-28 h-32 sm:w-32 sm:h-44 
       bg-white/5 backdrop-blur-[5px] border-white/15 hover:ring-2
        
        ${!isDragging
