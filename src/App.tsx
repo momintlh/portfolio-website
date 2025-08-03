@@ -27,10 +27,18 @@ function App() {
           >
 
             <div className="flex flex-row justify-evenly w-full p-4 border-b- border-white/10  border-b-2 rounded-xl">
-              <h1 className="text-white text-[1.25rem] font-mono cursor-pointer hover:text-purple-250 hover:underline" onClick={() => setIsAbout(true)}>
+              <h1 className={`text-[1.25rem] font-mono cursor-pointer hover:text-purple-400 hover:underline ${isAbout
+                ? "text-white transition-all duration-75"
+                : "text-gray-400 transition-all duration-75"
+                }`}
+                onClick={() => setIsAbout(true)}>
                 About
               </h1>
-              <h1 className="text-white text-[1.25rem] font-mono cursor-pointer hover:text-purple-250 hover:underline" onClick={() => setIsAbout(false)}>
+              <h1 className={`text-[1.25rem] font-mono cursor-pointer hover:text-purple-400 hover:underline ${!isAbout
+                ? "text-white transition-all duration-75"
+                : "text-gray-400 transition-all duration-75"
+                }`}
+                onClick={() => setIsAbout(false)}>
                 Projects
               </h1>
             </div>
