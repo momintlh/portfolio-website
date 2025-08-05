@@ -1,12 +1,9 @@
 import BackgroundCanvas from "./background";
 import { useState } from "react";
 import GlassCard from "./components/GlassCards";
-import Card from "./components/Card";
-
 
 function App() {
   const [isAbout, setIsAbout] = useState(true);
-
 
   return (
     <>
@@ -22,44 +19,60 @@ function App() {
         </div>
 
         <div className="flex justify-center items-center flex-grow">
-          <div
-            className="flex flex-col justify-center items-center w-[500px] h-[400px] rounded-xl text-center  border-white/10 border-2 shadow-lg bg-blue-500/5 backdrop-blur-[4px]"
-          >
-
+          <div className="flex flex-col justify-center items-center w-[500px] h-[400px] rounded-xl text-center  border-white/10 border-2 shadow-lg bg-blue-500/5 backdrop-blur-[4px]">
             <div className="flex flex-row justify-evenly w-full p-4 border-b- border-white/10  border-b-2 rounded-xl">
-              <h1 className={`text-[1.25rem] font-mono cursor-pointer hover:text-purple-400 hover:underline ${isAbout
-                ? "text-white transition-all duration-75"
-                : "text-gray-400 transition-all duration-75"
+              <h1
+                className={`text-[1.25rem] font-mono cursor-pointer hover:text-purple-400 hover:underline ${
+                  isAbout
+                    ? "text-white transition-all duration-75"
+                    : "text-gray-400 transition-all duration-75"
                 }`}
-                onClick={() => setIsAbout(true)}>
+                onClick={() => setIsAbout(true)}
+              >
                 About
               </h1>
-              <h1 className={`text-[1.25rem] font-mono cursor-pointer hover:text-purple-400 hover:underline ${!isAbout
-                ? "text-white transition-all duration-75"
-                : "text-gray-400 transition-all duration-75"
+              <h1
+                className={`text-[1.25rem] font-mono cursor-pointer hover:text-purple-400 hover:underline ${
+                  !isAbout
+                    ? "text-white transition-all duration-75"
+                    : "text-gray-400 transition-all duration-75"
                 }`}
-                onClick={() => setIsAbout(false)}>
+                onClick={() => setIsAbout(false)}
+              >
                 Projects
               </h1>
             </div>
 
             {isAbout ? (
-              < div className="w-full h-full flex justify-center items-center" >
+              <div className="w-full h-full flex justify-center items-center">
                 I am so cool!
               </div>
             ) : (
-              <div className="w-full h-full flex justify-center items-center" >
-                <GlassCard cardId={1} description="Top down game made with Unity" rotation="45" title="The Last Tale" />
-                My work is so cool!
+              <div className="w-full h-full flex justify-center items-center">
+                <GlassCard
+                  className="bg-orange-400/25 -rotate-6"
+                  cardId={1}
+                  description={`Juicy online multiple card combining and collection game\n where AI judges the outcome of your battles!`}
+                  title="Banana of Doom"
+                />
+                <GlassCard
+                  className="bg-rose-400/15 rotate-0"
+                  cardId={2}
+                  description="An proof of concept for detecting Autism using AI.This was my capstone project for my Bachelors"
+                  title="Autism Launchpad"
+                />
+                <GlassCard
+                  className="bg-green-400/15 -rotate-6"
+                  cardId={1}
+                  description="Top down wave based game made with Unity"
+                  title="The Last Tale"
+                />
               </div>
-            )
-            }
+            )}
           </div>
         </div>
-      </div >
-
+      </div>
     </>
-
   );
 }
 
