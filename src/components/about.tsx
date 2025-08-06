@@ -12,9 +12,9 @@ const About: React.FC = () => (
     </h2>
     <p className="text-base text-gray-300 text-center mb-4">
       I am a{" "}
-      <span className="font-semibold text-purple-400">Software Engineer</span>,
+      <span className="font-semibold text-cyan-400">Software Engineer</span>,
       with a soft spot for{" "}
-      <span className="font-semibold text-green-400">
+      <span className="font-semibold text-lime-400">
         Game and Tools Development
       </span>
       .
