@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface ProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -17,30 +15,44 @@ export default function ProjectModal({
   imageSrc,
   projectUrl,
 }: ProjectModalProps) {
-  if (!isOpen) return null;
-
   const getYouTubeVideoId = (url: string) => {
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const regExp =
+      /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
     const match = url?.match(regExp);
     return match && match[2].length === 11 ? match[2] : null;
   };
 
-  const isYouTubeUrl = imageSrc?.includes('youtube.com') || imageSrc?.includes('youtu.be');
+  const isYouTubeUrl =
+    imageSrc?.includes("youtube.com") || imageSrc?.includes("youtu.be");
   const videoId = isYouTubeUrl ? getYouTubeVideoId(imageSrc!) : null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50">
+    <div
+      className={`fixed inset-0 z-50 flex items-center justify-center transition-all duration-300 ease-out ${
+        isOpen
+          ? "opacity-100 pointer-events-auto"
+          : "opacity-0 pointer-events-none"
+      }`}
+    >
       {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+      <div
         onClick={onClose}
+        className={`absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ease-out ${
+          isOpen ? "opacity-100" : "opacity-0"
+        }`}
       />
-      
-      {/* Modal Content */}
-      <div className="relative w-[600px] max-h-[80vh] overflow-y-auto rounded-xl border-2 border-white/15 bg-blue-500/5 backdrop-blur-[4px] p-6 text-white">
+
+      {/* Modal */}
+      <div
+        className={`relative w-full max-w-3xl max-h-[80vh] flex justify-center items-center border-2 border-white overflow-y-auto bg-white/5 p-16 backdrop-blur-md rounded-2xl text-white shadow-lg transform transition-all duration-300 ease-out ${
+          isOpen
+            ? "opacity-100 scale-100 translate-y-0"
+            : "opacity-0 scale-95 translate-y-4"
+        }`}
+      >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-white"
+          className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors duration-200"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -58,41 +70,43 @@ export default function ProjectModal({
           </svg>
         </button>
 
-        {imageSrc && (
-          <div className="mb-6">
-            {videoId ? (
-              <div className="relative w-full pb-[56.25%] rounded-xl overflow-hidden border-2 border-white/15">
-                <iframe
-                  className="absolute top-0 left-0 w-full h-full"
-                  src={`https://www.youtube.com/embed/${videoId}`}
-                  title={title}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
+        <div className="space-y-6">
+          {imageSrc && (
+            <div className="w-full">
+              {videoId ? (
+                <div className="aspect-video w-full rounded-xl overflow-hidden border border-white/20">
+                  <iframe
+                    className="w-full h-full"
+                    src={`https://www.youtube.com/embed/${videoId}`}
+                    title={title}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+              ) : (
+                <img
+                  src={imageSrc}
+                  alt={title}
+                  className="object-cover rounded-xl border border-white/20"
                 />
-              </div>
-            ) : (
-              <img
-                src={imageSrc}
-                alt={title}
-                className="w-full h-64 object-cover rounded-lg border-2 border-white/15"
-              />
-            )}
-          </div>
-        )}
+              )}
+            </div>
+          )}
 
-        <div className="space-y-4">
-          <div className="flex items-center justify-between gap-4">
-            <h2 className="text-2xl font-mono font-semibold">{title}</h2>
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <h2 className="text-3xl font-mono font-semibold leading-snug">
+              {title}
+            </h2>
             {projectUrl && (
               <a
                 href={projectUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border-2 border-white/15 transition-all duration-200 whitespace-nowrap"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-white/20 transition-all duration-200 whitespace-nowrap"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4"
+                  className="h-5 w-5"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -104,11 +118,16 @@ export default function ProjectModal({
                     d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
                   />
                 </svg>
-                <span className="font-mono text-sm">Visit Project</span>
+                <span className="font-mono text-sm font-medium">
+                  Visit Project
+                </span>
               </a>
             )}
           </div>
-          <p className="text-gray-300 font-mono">{description}</p>
+
+          <p className="text-gray-300 font-mono leading-relaxed">
+            {description}
+          </p>
         </div>
       </div>
     </div>

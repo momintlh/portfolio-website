@@ -6,9 +6,22 @@ import { DndContext } from "@dnd-kit/core";
 import bodImg from "./assets/images/bod.png";
 import punity from "./assets/images/punity.png";
 import al from "./assets/images/al.png";
+import ProjectModal from "./components/ProjectModal";
+
+interface CardData {
+  cardId: number;
+  title: string;
+  img?: string;
+  description: string;
+  projectUrl?: string;
+  bg?: string;
+  rotation?: string;
+}
 
 function App() {
   const [isAbout, setIsAbout] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedCard, setSelectedCard] = useState<CardData | null>(null);
 
   function getRandomRotation() {
     const rotations = [
@@ -40,7 +53,7 @@ function App() {
     return bgs[Math.floor(Math.random() * bgs.length)];
   }
 
-  const cardsData = [
+  const cardsData: CardData[] = [
     {
       cardId: 1,
       title: "Banana of Doom",
@@ -72,10 +85,11 @@ where AI judges the outcome of your battles!`,
       rotation: "rotate-0",
     },
     {
-      cardId: 3,
+      cardId: 4,
       title: "The Last Tale",
       // img: al,
-      description: "Retro inspired game made with Unity where you have to defend yourself and a valuable from waves of enemies.",
+      description:
+        "Retro inspired game made with Unity where you have to defend yourself and a valuable from waves of enemies.",
       projectUrl: "https://github.com/momintlh/Last-Tale",
       bg: "bg-green-400/15",
       rotation: "rotate-3",
@@ -84,12 +98,16 @@ where AI judges the outcome of your battles!`,
       cardId: 5,
       title: "Foodefender",
       img: "https://www.youtube.com/watch?v=aKPagTt4eI8",
-      description:
-        "Art award winning game made for Rookie Game Jam 23.",
+      description: "Art award winning game made for Rookie Game Jam 23.",
       projectUrl: "https://momintlh.itch.io/foodefender",
       rotation: "rotate-0",
     },
   ];
+
+  const handleCardClick = (card: CardData) => {
+    setSelectedCard(card);
+    setIsModalOpen(true);
+  };
 
   return (
     <>
@@ -106,24 +124,29 @@ where AI judges the outcome of your battles!`,
 
         <div className="flex justify-center items-center flex-grow">
           <div
-            className={`flex flex-col justify-center items-center ${isAbout ? "w-[500px] h-[400px] transition-width duration-300" : "w-[600px] h-[400px] transition-width duration-300"
-              } rounded-xl text-center  border-white/10 border-2 shadow-lg bg-blue-500/5 backdrop-blur-[4px]`}
+            className={`flex flex-col justify-center items-center ${
+              isAbout
+                ? "w-[500px] h-[400px] transition-width duration-300"
+                : "w-[600px] h-[400px] transition-width duration-300"
+            } rounded-xl text-center  border-white/10 border-2 shadow-lg bg-blue-500/5 backdrop-blur-[4px]`}
           >
             <div className="flex flex-row justify-evenly w-full p-4 border-b- border-white/10  border-b-2 rounded-xl">
               <h1
-                className={`text-[1.25rem] font-mono cursor-pointer hover:text-purple-400 hover:underline ${isAbout
-                  ? "text-white transition-all duration-75"
-                  : "text-gray-400 transition-all duration-75"
-                  }`}
+                className={`text-[1.25rem] font-mono cursor-pointer hover:text-purple-400 hover:underline ${
+                  isAbout
+                    ? "text-white transition-all duration-75"
+                    : "text-gray-400 transition-all duration-75"
+                }`}
                 onClick={() => setIsAbout(true)}
               >
                 About
               </h1>
               <h1
-                className={`text-[1.25rem] font-mono cursor-pointer hover:text-purple-400 hover:underline ${!isAbout
-                  ? "text-white transition-all duration-75"
-                  : "text-gray-400 transition-all duration-75"
-                  }`}
+                className={`text-[1.25rem] font-mono cursor-pointer hover:text-purple-400 hover:underline ${
+                  !isAbout
+                    ? "text-white transition-all duration-75"
+                    : "text-gray-400 transition-all duration-75"
+                }`}
                 onClick={() => setIsAbout(false)}
               >
                 Projects
@@ -131,20 +154,20 @@ where AI judges the outcome of your battles!`,
             </div>
 
             {isAbout ? (
-              <div className="w-full h-full flex justify-center items-center">
-              </div>
+              <div className="w-full h-full flex justify-center items-center"></div>
             ) : (
               <div className="grid grid-cols-3 gap-4 place-items-center h-full w-full overflow-y-auto p-8">
-                <DndContext onDragEnd={() => { }} onDragStart={() => { }}>
-                  {cardsData.map(({ cardId, title, img, description, projectUrl }) => (
+                <DndContext onDragEnd={() => {}} onDragStart={() => {}}>
+                  {cardsData.map((card) => (
                     <GlassCard
-                      key={cardId + title}
-                      imageSrc={img}
-                      cardId={cardId}
-                      title={title}
-                      description={description}
-                      projectUrl={projectUrl}
+                      key={card.cardId + card.title}
+                      imageSrc={card.img}
+                      cardId={card.cardId}
+                      title={card.title}
+                      description={card.description}
+                      projectUrl={card.projectUrl}
                       className={`${getRandomBg()} ${getRandomRotation()}`}
+                      onClick={() => handleCardClick(card)}
                     />
                   ))}
                 </DndContext>
@@ -153,6 +176,17 @@ where AI judges the outcome of your battles!`,
           </div>
         </div>
       </div>
+
+      {selectedCard && (
+        <ProjectModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          title={selectedCard.title}
+          description={selectedCard.description}
+          imageSrc={selectedCard.img}
+          projectUrl={selectedCard.projectUrl}
+        />
+      )}
     </>
   );
 }

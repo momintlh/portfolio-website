@@ -10,6 +10,7 @@ interface CardProps {
   cardId: number;
   imageSrc?: string;
   projectUrl?: string;
+  onClick?: () => void;
 }
 
 export default function GlassCard({
@@ -19,6 +20,7 @@ export default function GlassCard({
   className = "",
   imageSrc,
   projectUrl,
+  onClick,
 }: CardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { attributes, listeners, setNodeRef, transform, isDragging } =
@@ -41,7 +43,7 @@ export default function GlassCard({
     if (!isDragging) {
       // Stop the event from triggering drag events
       e.stopPropagation();
-      setIsModalOpen(true);
+      if (onClick) onClick();
     }
   };
 
@@ -93,16 +95,7 @@ export default function GlassCard({
             {description}
           </p>
         </div>
-      </div>
-
-      <ProjectModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title={title}
-        description={description}
-        imageSrc={imageSrc}
-        projectUrl={projectUrl}
-      />
+      </div>      
     </>
   );
 }
