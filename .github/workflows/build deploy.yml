@@ -1,8 +1,9 @@
 name: Build & Deploy to GitHub Pages
+
 on:
   push:
     branches:
-      - main    
+      - main   
 
 permissions:
   pages: write
@@ -16,10 +17,11 @@ jobs:
         node-version: [20]
 
     steps:
+      # 1. Grab your code
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js ${{ matrix.node-version }}
+      - name: Set up Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
@@ -28,7 +30,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 10
+          version: 10    
 
       - name: Install dependencies
         run: pnpm install
@@ -36,7 +38,7 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Upload static content to GitHub Pages
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist
