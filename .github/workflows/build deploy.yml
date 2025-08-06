@@ -1,45 +1,48 @@
 name: Build & Deploy to GitHub Pages
-
 on:
   push:
     branches:
       - main   
-
 permissions:
   pages: write
   id-token: write
-
 jobs:
   build-and-deploy:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
         node-version: [20]
-
     steps:
       # 1. Grab your code
       - name: Checkout repository
         uses: actions/checkout@v4
-
+      
+      # 2. Install pnpm first
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      
+      # 3. Set up Node.js with pnpm cache
       - name: Set up Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: pnpm
-
-      - name: Install pnpm
-        run: npm install -g pnpm@10
-
+      
+      # 4. Install dependencies
       - name: Install dependencies
         run: pnpm install
-
+      
+      # 5. Build
       - name: Build
         run: pnpm build
-
+      
+      # 6. Upload and deploy
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
-
+          path: docs
+      
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
