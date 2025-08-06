@@ -61,7 +61,8 @@ function App() {
       img: bodImg,
       description: `Juicy online multiple card combining and collection game
 where AI judges the outcome of your battles!`,
-      projectUrl: "https://banannaofdoom.vercel.app/",
+      projectUrl:
+        "https://ptb.discord.com/activities/1344393507812409505?referrer_id=476709524011614219",
       bg: "bg-orange-400/25",
       rotation: "-rotate-6",
     },
