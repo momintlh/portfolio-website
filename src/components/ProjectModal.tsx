@@ -44,7 +44,7 @@ export default function ProjectModal({
 
       {/* Modal */}
       <div
-        className={`relative w-full max-w-3xl max-h-[80vh] flex justify-center items-center border-2 border-white overflow-y-auto bg-white/5 p-16 backdrop-blur-md rounded-2xl text-white shadow-lg transform transition-all duration-300 ease-out ${
+        className={`relative w-full max-w-3xl max-h-[80vh] flex justify-center items-center border-2 border-white overflow-hidden bg-white/5 p-16 backdrop-blur-md rounded-2xl text-white shadow-lg transform transition-all duration-300 ease-out ${
           isOpen
             ? "opacity-100 scale-100 translate-y-0"
             : "opacity-0 scale-95 translate-y-4"
@@ -72,7 +72,7 @@ export default function ProjectModal({
 
         <div className="space-y-6">
           {imageSrc && (
-            <div className="w-full">
+            <div className="flex justify-center items-center">
               {videoId ? (
                 <div className="aspect-video w-full rounded-xl overflow-hidden border border-white/20">
                   <iframe
@@ -87,7 +87,7 @@ export default function ProjectModal({
                 <img
                   src={imageSrc}
                   alt={title}
-                  className="object-cover rounded-xl border border-white/20"
+                  className="w-[500px] object-cover rounded-xl border border-white/20"
                 />
               )}
             </div>
