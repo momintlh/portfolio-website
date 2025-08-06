@@ -7,6 +7,7 @@ import bodImg from "./assets/images/bod.png";
 import punity from "./assets/images/punity.png";
 import al from "./assets/images/al.png";
 import ProjectModal from "./components/ProjectModal";
+import About from "./components/about";
 
 interface CardData {
   cardId: number;
@@ -80,7 +81,8 @@ where AI judges the outcome of your battles!`,
       img: al,
       description:
         "A proof of concept for detecting Autism using AI. This was the capstone project for my Bachelors.",
-      projectUrl: "https://github.com/momintlh/Autism-Assessment-and-Image-based-Classification-App",
+      projectUrl:
+        "https://github.com/momintlh/Autism-Assessment-and-Image-based-Classification-App",
       bg: "bg-rose-400/15",
       rotation: "rotate-0",
     },
@@ -154,7 +156,9 @@ where AI judges the outcome of your battles!`,
             </div>
 
             {isAbout ? (
-              <div className="w-full h-full flex justify-center items-center"></div>
+              <div className="w-full h-full flex justify-center items-center">
+                <About></About>
+              </div>
             ) : (
               <div className="grid grid-cols-3 gap-4 place-items-center h-full w-full overflow-y-auto p-8">
                 <DndContext onDragEnd={() => {}} onDragStart={() => {}}>
