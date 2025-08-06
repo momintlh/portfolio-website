@@ -18,8 +18,6 @@ const BackgroundCanvas: React.FC<CanvasProps> = ({ children }) => {
   const offset = 0;
   const circleRadiusAndFont = 0;
 
-  // We'll store grid as a simple array.
-  // For a more reactive UI, consider using useState.
   let grid: number[][];
 
   const CreateGrid = async (): Promise<{ rows: number; cols: number; grid: number[][] }> => {
@@ -62,7 +60,7 @@ const BackgroundCanvas: React.FC<CanvasProps> = ({ children }) => {
     ctx.strokeStyle = "rgba(0, 255, 255, 0.1)";
     for (let c = 0; c < grid.length; c++) {
       for (let r = 0; r < grid[c].length; r++) {
-        // Determine circle color based on grid value (for example)
+
         const color = grid[c][r] === 0 ? "white" : "black";
         const x = c * res + offset;
         const y = r * res + offset;
@@ -94,8 +92,6 @@ const BackgroundCanvas: React.FC<CanvasProps> = ({ children }) => {
 
 
         let state = getState(grid[c][r], grid[c + 1][r], grid[c + 1][r + 1], grid[c][r + 1]);
-        console.log("b: " + grid[c][r], grid[c + 1][r], grid[c + 1][r + 1], grid[c][r + 1]);
-        console.log("State:" + state);
 
         drawState(state, ctx, A, B, C, D);
       }
@@ -148,14 +144,12 @@ const BackgroundCanvas: React.FC<CanvasProps> = ({ children }) => {
     }
   };
 
-  // A function to redraw the canvas
   const redraw = (ctx: CanvasRenderingContext2D, canvasWidth: number, canvasHeight: number) => {
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
     drawBackgroundGrid(ctx, canvasWidth, canvasHeight);
     drawContours(ctx, canvasWidth, canvasHeight);
   };
 
-  // Setup canvas size and initial drawing
   const handleResize = async () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -169,12 +163,10 @@ const BackgroundCanvas: React.FC<CanvasProps> = ({ children }) => {
     redraw(ctx, canvas.width, canvas.height);
   };
 
-  // Add a single event listener for clicks on the canvas
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    // Ensure the canvas is set up initially
     handleResize();
 
     const handleClick = (ev: MouseEvent) => {
@@ -182,7 +174,6 @@ const BackgroundCanvas: React.FC<CanvasProps> = ({ children }) => {
       const mouseX = ev.clientX - rect.left;
       const mouseY = ev.clientY - rect.top;
 
-      // Check each circle in the grid
       for (let c = 0; c < grid.length; c++) {
         for (let r = 0; r < grid[c].length; r++) {
           const circleX = c * res + offset;
@@ -191,11 +182,8 @@ const BackgroundCanvas: React.FC<CanvasProps> = ({ children }) => {
           // Calculate distance from click to circle center
           const dist = Math.sqrt((mouseX - circleX) ** 2 + (mouseY - circleY) ** 2);
           if (dist <= radius) {
-            console.log(`Circle at grid position [${c}, ${r}] clicked!`);
-            // For example, toggle the grid value
             grid[c][r] = grid[c][r] === 0 ? 1 : 0;
 
-            // Redraw the canvas with updated grid state
             const ctx = canvas.getContext("2d");
             if (ctx) {
               redraw(ctx, canvas.width, canvas.height);
