@@ -1,7 +1,5 @@
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import { useState } from "react";
-import ProjectModal from "./ProjectModal";
 
 interface CardProps {
   title: string;
@@ -19,10 +17,8 @@ export default function GlassCard({
   cardId,
   className = "",
   imageSrc,
-  projectUrl,
   onClick,
 }: CardProps) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
       id: `card${cardId}`,
