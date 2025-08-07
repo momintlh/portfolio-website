@@ -55,27 +55,26 @@ function App() {
   }
 
   const cardsData: CardData[] = [
-    {
-      cardId: 1,
-      title: "Banana of Doom",
-      img: bodImg,
-      description: `Juicy online multiple card combining and collection game
-where AI judges the outcome of your battles!`,
-      projectUrl:
-        "https://ptb.discord.com/activities/1344393507812409505?referrer_id=476709524011614219",
-      bg: "bg-orange-400/25",
-      rotation: "-rotate-6",
-    },
-    {
-      cardId: 2,
-      img: punity,
-      title: "Playroomkit Unity",
-      description: "Easy multiplayer sdk for online games.",
-      projectUrl: "https://github.com/playroomkit/unity",
-      bg: "bg-green-400/15",
-      rotation: "rotate-4",
-    },
-
+//     {
+//       cardId: 1,
+//       title: "Banana of Doom",
+//       img: bodImg,
+//       description: `Juicy online multiple card combining and collection game
+// where AI judges the outcome of your battles!`,
+//       projectUrl:
+//         "https://ptb.discord.com/activities/1344393507812409505?referrer_id=476709524011614219",
+//       bg: "bg-orange-400/25",
+//       rotation: "-rotate-6",
+//     },
+//     {
+//       cardId: 2,
+//       img: punity,
+//       title: "Playroomkit Unity",
+//       description: "Easy multiplayer sdk for online games.",
+//       projectUrl: "https://github.com/playroomkit/unity",
+//       bg: "bg-green-400/15",
+//       rotation: "rotate-4",
+//     },
     {
       cardId: 4,
       title: "Autism Launchpad",
